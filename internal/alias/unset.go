@@ -5,9 +5,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/JPZ13/dpm/parser"
-	"github.com/JPZ13/dpm/project"
-	"github.com/JPZ13/dpm/utils"
+	"github.com/JPZ13/dpm/internal/parser"
+	"github.com/JPZ13/dpm/internal/project"
+	"github.com/JPZ13/dpm/internal/utils"
 )
 
 // UnsetAliases removes all of the aliases
