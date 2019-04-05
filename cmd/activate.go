@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/JPZ13/dpm/internal/alias"
 	"github.com/JPZ13/dpm/internal/project"
 	"github.com/JPZ13/dpm/internal/shell"
+	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -23,23 +23,18 @@ var activateCmd = &cobra.Command{
 	Short: "Activates the project in the current shell",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !project.IsProjectInstalled() {
-			installYAMLPackages()
+			err := installYAMLPackages()
+			utils.HandleFatalError(err)
 		}
 
 		err := project.ActivateProject()
-		if err != nil {
-			log.Fatalf("error: %v", err)
-		}
+		utils.HandleFatalError(err)
 
 		err = alias.SetAliases()
-		if err != nil {
-			log.Fatalf("error: %v", err)
-		}
+		utils.HandleFatalError(err)
 
 		err = shell.StartShell(shell.Activate)
-		if err != nil {
-			log.Fatalf("error: %v", err)
-		}
+		utils.HandleFatalError(err)
 
 		fmt.Printf("Project '%s' activated\n", project.ProjectName)
 	},

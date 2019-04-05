@@ -28,9 +28,12 @@ func StartShell(activate ProjectState) error {
 
 	// Set an environment variable.
 	if activate == Activate {
-		os.Setenv("DPM_ACTIVE", project.ProjectCmdPath)
+		err = os.Setenv("DPM_ACTIVE", project.ProjectCmdPath)
 	} else if activate == Deactivate {
-		os.Unsetenv("DPM_ACTIVE")
+		err = os.Unsetenv("DPM_ACTIVE")
+	}
+	if err != nil {
+		return err
 	}
 
 	// Transfer stdin, stdout, and stderr to the new process

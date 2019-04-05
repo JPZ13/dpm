@@ -10,6 +10,7 @@ import (
 
 	"github.com/JPZ13/dpm/internal/parser"
 	"github.com/JPZ13/dpm/internal/project"
+	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -25,23 +26,19 @@ var installCmd = &cobra.Command{
 			log.Fatal("error: no `dpm.yml` file found\n")
 		}
 
-		os.RemoveAll(project.ProjectCmdPath)
-		err := os.MkdirAll(project.ProjectCmdPath, 0755)
-		if err != nil {
-			log.Fatalf("error: %v", err)
-		}
+		err := os.RemoveAll(project.ProjectCmdPath)
+		utils.HandleFatalError(err)
+
+		err = os.MkdirAll(project.ProjectCmdPath, 0755)
+		utils.HandleFatalError(err)
 
 		if len(args) > 0 {
 			err = installListedPackages(args)
-			if err != nil {
-				log.Fatalf("error: %v", err)
-			}
+			utils.HandleFatalError(err)
 		}
 
 		err = installYAMLPackages()
-		if err != nil {
-			log.Fatalf("error: %v", err)
-		}
+		utils.HandleFatalError(err)
 	},
 }
 
@@ -50,15 +47,11 @@ var installCmd = &cobra.Command{
 func installYAMLPackages() error {
 	commands := parser.GetCommands(project.ProjectFilePath)
 	data, err := ioutil.ReadFile(project.ProjectFilePath)
-	if err != nil {
-		return err
-	}
+	utils.HandleFatalError(err)
 
 	// TODO: figure out what this is used for
 	err = ioutil.WriteFile(path.Join(project.ProjectCmdPath, "dpm.yml"), data, 0644)
-	if err != nil {
-		return err
-	}
+	utils.HandleFatalError(err)
 
 	fmt.Printf("Installing %d commands...\n", len(commands))
 
@@ -68,9 +61,7 @@ func installYAMLPackages() error {
 		commandNames = append(commandNames, name)
 		cliCommands := commandToDockerCLIs(command)
 		err = writeDockerBashCommands(cliCommands)
-		if err != nil {
-			return err
-		}
+		utils.HandleFatalError(err)
 	}
 
 	fmt.Printf("Installed: %s\n", strings.Join(commandNames, ", "))
@@ -113,9 +104,7 @@ func writeDockerBashCommands(cliCommands map[string]string) error {
 		contents := fmt.Sprintf("#!/bin/sh\nexec %s", bashCommand)
 
 		err := ioutil.WriteFile(targetPath, []byte(contents), 0755)
-		if err != nil {
-			return err
-		}
+		utils.HandleFatalError(err)
 	}
 
 	return nil

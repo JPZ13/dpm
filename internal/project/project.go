@@ -1,26 +1,35 @@
 package project
 
 import (
-	"log"
 	"os"
 	"path"
+
+	"github.com/JPZ13/dpm/internal/utils"
 )
 
 const (
 	configName = ".dpm-config.json"
 )
 
+// ProjectPath TODO: update
 var ProjectPath string
+
+// ProjectCmdPath TODO: update
 var ProjectCmdPath string
+
+// ProjectFilePath TODO: update
 var ProjectFilePath string
+
+// ProjectName TODO: update
 var ProjectName string
+
+// ProjectActive TODO: update
 var ProjectActive bool
 
+// TODO: fix this pattern to use a constructor
 func init() {
 	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
+	utils.HandleFatalError(err)
 	ProjectPath = wd
 	ProjectCmdPath = path.Join(wd, ".dpm")
 	ProjectFilePath = path.Join(wd, "dpm.yml")
@@ -28,11 +37,15 @@ func init() {
 	ProjectActive = false
 }
 
+// IsProjectInitialized checks the environment variable for whether the
+// ProjectFilePath is set
 func IsProjectInitialized() bool {
 	_, err := os.Stat(ProjectFilePath)
 	return err == nil
 }
 
+// IsProjectInstalled checks the environment variable for whether the
+// ProjectCmdPath is set
 func IsProjectInstalled() bool {
 	_, err := os.Stat(ProjectCmdPath)
 	return err == nil

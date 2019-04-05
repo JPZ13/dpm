@@ -8,6 +8,7 @@ import (
 
 	"github.com/JPZ13/dpm/internal/parser"
 	"github.com/JPZ13/dpm/internal/project"
+	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -20,9 +21,7 @@ var listCmd = &cobra.Command{
 	Short: "List available commands in the current project",
 	Run: func(cmd *cobra.Command, args []string) {
 		isActive, err := project.IsProjectActive()
-		if err != nil {
-			log.Fatalf("error: %s", err)
-		}
+		utils.HandleFatalError(err)
 
 		if !isActive {
 			log.Fatal("error: no active project - please run `dpm activate` first from your project root")
@@ -30,10 +29,15 @@ var listCmd = &cobra.Command{
 
 		commands := parser.GetCommands(project.ProjectFilePath)
 		w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
-		fmt.Fprintln(w, "COMMAND\tIMAGE\tENTRYPOINT")
+		_, err = fmt.Fprintln(w, "COMMAND\tIMAGE\tENTRYPOINT")
+		utils.HandleFatalError(err)
+
 		for name, command := range commands {
-			fmt.Fprintf(w, "%s\t%s\t%s\n", name, command.Image, command.Entrypoints)
+			_, err = fmt.Fprintf(w, "%s\t%s\t%s\n", name, command.Image, command.Entrypoints)
+			utils.HandleFatalError(err)
 		}
-		w.Flush()
+
+		err = w.Flush()
+		utils.HandleFatalError(err)
 	},
 }

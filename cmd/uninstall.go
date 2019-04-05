@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/JPZ13/dpm/internal/parser"
 	"github.com/JPZ13/dpm/internal/project"
+	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -30,17 +29,18 @@ var uninstallCmd = &cobra.Command{
 			uninstallAll()
 		} else {
 			err := uninstallListedPackages(args)
-			if err != nil {
-				log.Fatalf("error: %v", err)
-			}
+			utils.HandleFatalError(err)
 
-			installYAMLPackages()
+			err = installYAMLPackages()
+			utils.HandleFatalError(err)
 		}
 	},
 }
 
 func uninstallAll() {
-	os.RemoveAll(project.ProjectCmdPath)
+	err := os.RemoveAll(project.ProjectCmdPath)
+	utils.HandleFatalError(err)
+
 	fmt.Println("All commands uninstalled")
 }
 
@@ -52,7 +52,7 @@ func uninstallListedPackages(packages []string) error {
 			delete(commands, pkg)
 			continue
 		}
-		return errors.New(fmt.Sprintf("Command %s not in project", pkg))
+		return fmt.Errorf("Command %s not in project", pkg)
 	}
 
 	return parser.UpdateCommands(project.ProjectFilePath, commands)

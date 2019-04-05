@@ -5,21 +5,19 @@ import (
 	"log"
 	"os"
 
+	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/go-yaml/yaml"
 )
 
 // GetCommands gets all the commands in a dpm.yml file
+// TODO: modify to just return the error
 func GetCommands(filename string) map[string]Command {
 	fileBytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
+	utils.HandleFatalError(err)
 
 	inputfile := dpmFile{}
 	err = yaml.Unmarshal([]byte(fileBytes), &inputfile)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
+	utils.HandleFatalError(err)
 
 	commands, ok := inputfile["commands"]
 	if !ok {
