@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/JPZ13/dpm/internal/utils"
-	"github.com/go-yaml/yaml"
+	"gopkg.in/yaml.v2"
 )
 
 // GetCommands gets all the commands in a dpm.yml file
