@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/JPZ13/dpm/internal/parser"
@@ -29,6 +30,9 @@ var installCmd = &cobra.Command{
 		err := os.RemoveAll(project.ProjectCmdPath)
 		utils.HandleFatalError(err)
 
+		err = maybeMakeDotDPMFolder()
+		utils.HandleFatalError(err)
+
 		err = os.MkdirAll(project.ProjectCmdPath, 0755)
 		utils.HandleFatalError(err)
 
@@ -40,6 +44,25 @@ var installCmd = &cobra.Command{
 		err = installYAMLPackages()
 		utils.HandleFatalError(err)
 	},
+}
+
+// maybeMakeDotDPMFolder ensures that there is a .dpm
+// folder in the home directory
+func maybeMakeDotDPMFolder() error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	dpmFolder := filepath.Join(homeDir, project.DotDPMFolder)
+
+	ok, err := utils.DoesFileExist(dpmFolder)
+	if !ok {
+		os.MkdirAll(dpmFolder, utils.WriteMode)
+		return nil
+	}
+
+	return err
 }
 
 // installYAMLPackages writes bash scripts for
