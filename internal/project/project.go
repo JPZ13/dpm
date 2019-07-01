@@ -9,6 +9,8 @@ import (
 
 const (
 	configName = ".dpm-config.json"
+	// DotDPMFolder houses commands
+	DotDPMFolder = ".dpm"
 )
 
 // ProjectPath TODO: update

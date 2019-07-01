@@ -6,6 +6,10 @@ import (
 	"os"
 )
 
+// WriteMode is the default
+// file/folder writing mode
+const WriteMode = 0755
+
 // DoesFileExist is a quick way to check if
 // a file is already in the filesystem
 func DoesFileExist(filename string) (bool, error) {
