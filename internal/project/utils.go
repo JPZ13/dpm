@@ -3,7 +3,6 @@ package project
 import (
 	"encoding/json"
 	"io/ioutil"
-	"os/user"
 )
 
 func writeProjectTableToFile(projectTable map[string]bool, filename string) error {
@@ -28,13 +27,4 @@ func getProjectTable(filename string) (map[string]bool, error) {
 	}
 
 	return projectTable, nil
-}
-
-func getHomeDirectory() (string, error) {
-	usr, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-
-	return usr.HomeDir, nil
 }

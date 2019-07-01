@@ -1,5 +1,5 @@
 PKG_NAME := github.com/JPZ13/dpm
-GO := docker run -it --rm -v ${PWD}:/go/src/$(PKG_NAME) -w /go/src/$(PKG_NAME) -e GOOS -e GOARCH golang:1.7 go
+GO := docker run -it --rm -v ${PWD}:/go/src/$(PKG_NAME) -w /go/src/$(PKG_NAME) -e GOOS -e GOARCH golang:1.12 go
 GLIDE := docker run -it --rm -v ${PWD}:/run/context -w /run/context dockerepo/glide
 
 .PHONY: all clean binaries linux-binary mac-binary fmt glide-init glide-install glide-update
