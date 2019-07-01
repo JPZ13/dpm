@@ -2,6 +2,7 @@ package project
 
 import (
 	"errors"
+	"os"
 	"path"
 
 	"github.com/JPZ13/dpm/internal/utils"
@@ -13,7 +14,7 @@ const (
 
 // DeactivateProject removes the project from the config json file
 func DeactivateProject() error {
-	homeDir, err := getHomeDirectory()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return err
 	}

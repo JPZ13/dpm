@@ -2,6 +2,7 @@ package project
 
 import (
 	"io/ioutil"
+	"os"
 	"path"
 
 	"github.com/JPZ13/dpm/internal/utils"
@@ -24,7 +25,7 @@ func ActivateProject() error {
 // at $HOME/.dpm-config.json to determine
 // if the project is active
 func IsProjectActive() (bool, error) {
-	homeDir, err := getHomeDirectory()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return false, err
 	}
@@ -64,7 +65,7 @@ func activateProjectInConfig(filename string) error {
 // makeConfigIfNotExist writes the config
 // if the file does not exist
 func makeConfigIfNotExist() (string, error) {
-	homeDir, err := getHomeDirectory()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
