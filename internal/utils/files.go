@@ -23,6 +23,28 @@ func DoesFileExist(filename string) (bool, error) {
 	return true, nil
 }
 
+// GetFileBytes opens a file and gets all its contents
+func GetFileBytes(filename string) ([]byte, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
+
+// WriteFileBytes is a convenience method for writing
+// to a file
+func WriteFileBytes(filename string, bytes []byte) error {
+	return ioutil.WriteFile(filename, bytes, WriteMode)
+}
+
 // WriteBashScript is a quick way to write
 // a bash script
 func WriteBashScript(location string, content string) error {
