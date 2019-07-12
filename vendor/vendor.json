@@ -15,6 +15,12 @@
 			"revisionTime": "2014-10-17T20:07:13Z"
 		},
 		{
+			"checksumSHA1": "NUD1Gf00sYOP6RUk6iSYmFzogmQ=",
+			"path": "github.com/opencontainers/go-digest",
+			"revision": "ac19fd6e7483ff933754af248d80be865e543d22",
+			"revisionTime": "2019-02-28T22:06:55Z"
+		},
+		{
 			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
 			"path": "github.com/pmezard/go-difflib/difflib",
 			"revision": "5d4384ee4fb2527b0a1256a821ebfc92f91efefc",
