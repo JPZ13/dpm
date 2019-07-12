@@ -16,8 +16,12 @@ func (c *client) Set(path string, info AliasInfo) error {
 
 	// unmarshal any json at given path
 	aliases, err := getAliasInfoAtPath(digest)
-	if err != nil {
+	if err != nil && !utils.IsFileNotFoundError(err) {
 		return err
+	}
+
+	if aliases == nil {
+		aliases = []AliasInfo{}
 	}
 
 	// append to what is currently there

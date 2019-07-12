@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 // WriteMode is the default
@@ -37,6 +38,13 @@ func GetFileBytes(filename string) ([]byte, error) {
 	}
 
 	return bytes, nil
+}
+
+// IsFileNotFoundError determines whether the
+// error is from the file not existing
+func IsFileNotFoundError(err error) bool {
+	str := err.Error()
+	return strings.Contains(str, ": no such file or directory")
 }
 
 // WriteFileBytes is a convenience method for writing

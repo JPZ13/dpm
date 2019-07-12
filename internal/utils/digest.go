@@ -9,12 +9,13 @@ import (
 // GetDigestJSONFilename generates a filename with a json
 // extension that is a hash of the path passed in
 func GetDigestJSONFilename(path string) (string, error) {
-	hash, err := digest.Parse(path)
+	dgst := digest.FromString(path)
+	err := dgst.Validate()
 	if err != nil {
 		return "", err
 	}
 
-	str := hash.String()
+	str := dgst.String()
 	var buffer bytes.Buffer
 	buffer.WriteString(str)
 	buffer.WriteString(".json")
