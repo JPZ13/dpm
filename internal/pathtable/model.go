@@ -1,4 +1,4 @@
-package bubblelookup
+package pathtable
 
 // AliasInfo contains info on CLI commands
 // that will be run in containers

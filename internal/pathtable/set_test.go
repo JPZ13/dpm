@@ -1,4 +1,4 @@
-package bubblelookup
+package pathtable
 
 import (
 	"testing"
