@@ -1,4 +1,4 @@
-package cas
+package bubblelookup
 
 // AliasInfo contains info on CLI commands
 // that will be run in containers

@@ -1,4 +1,4 @@
-package cas
+package bubblelookup
 
 import (
 	"path"
