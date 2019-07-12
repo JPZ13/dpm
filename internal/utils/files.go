@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
+	"path"
 )
 
 // WriteMode is the default
@@ -40,17 +40,28 @@ func GetFileBytes(filename string) ([]byte, error) {
 	return bytes, nil
 }
 
-// IsFileNotFoundError determines whether the
-// error is from the file not existing
-func IsFileNotFoundError(err error) bool {
-	str := err.Error()
-	return strings.Contains(str, ": no such file or directory")
-}
-
 // WriteFileBytes is a convenience method for writing
 // to a file
 func WriteFileBytes(filename string, bytes []byte) error {
+	err := EnsureDirectoryForFile(filename)
+	if err != nil {
+		return err
+	}
+
 	return ioutil.WriteFile(filename, bytes, WriteMode)
+}
+
+// EnsureDirectoryForFile creates a directory for a file/folder
+// if it does not exist
+func EnsureDirectoryForFile(location string) error {
+	directory := path.Dir(location)
+	_, err := os.Stat(directory)
+
+	if os.IsNotExist(err) {
+		return os.Mkdir(directory, WriteMode)
+	}
+
+	return err
 }
 
 // WriteBashScript is a quick way to write

@@ -2,6 +2,7 @@ package cas
 
 import (
 	"encoding/json"
+	"os"
 
 	"github.com/JPZ13/dpm/internal/utils"
 )
@@ -16,7 +17,7 @@ func (c *client) Set(path string, info AliasInfo) error {
 
 	// unmarshal any json at given path
 	aliases, err := getAliasInfoAtPath(digest)
-	if err != nil && !utils.IsFileNotFoundError(err) {
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
