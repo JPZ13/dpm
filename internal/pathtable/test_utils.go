@@ -47,6 +47,13 @@ func makePythonAliasInfo() AliasInfo {
 	}
 }
 
+func makeProjectInfo() ProjectInfo {
+	return ProjectInfo{
+		IsActive: true,
+		Commands: []AliasInfo{},
+	}
+}
+
 func getTestDigestFromPath(t *testing.T, location string) string {
 	digest, err := utils.GetDigestJSONFilename(location)
 	require.NoError(t, err)

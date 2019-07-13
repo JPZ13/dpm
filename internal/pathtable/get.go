@@ -9,11 +9,12 @@ import (
 )
 
 // Get retrieves blobs given an input path
-func (c *client) Get(location string) ([]AliasInfo, error) {
+func (c *client) Get(location string) (*ProjectInfo, error) {
 	// bubble up path checking for matches in basedirectory
 	var digest string
+	var err error
 	for location != "/" {
-		digest, err := c.getDigestFromPath(location)
+		digest, err = c.getDigestFromPath(location)
 		if err != nil {
 			return nil, err
 		}
@@ -38,20 +39,20 @@ func (c *client) Get(location string) ([]AliasInfo, error) {
 		}
 	}
 
-	return getAliasInfoAtPath(digest)
+	return getProjectInfoAtPath(digest)
 }
 
-func getAliasInfoAtPath(location string) ([]AliasInfo, error) {
+func getProjectInfoAtPath(location string) (*ProjectInfo, error) {
 	bytes, err := utils.GetFileBytes(location)
 	if err != nil {
 		return nil, err
 	}
 
-	var aliases []AliasInfo
-	err = json.Unmarshal(bytes, &aliases)
+	var projectInfo ProjectInfo
+	err = json.Unmarshal(bytes, &projectInfo)
 	if err != nil {
 		return nil, err
 	}
 
-	return aliases, nil
+	return &projectInfo, nil
 }

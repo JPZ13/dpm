@@ -6,13 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSetAliasInfo(t *testing.T) {
-	client := makeTestClient()
-
-	goAlias := makeGoAliasInfo()
-
-	err := client.Set(testLocation, goAlias)
+func testSet(t *testing.T, client Client, project ProjectInfo) {
+	err := client.Set(testLocation, project)
 	require.NoError(t, err)
-
-	removeTestLocationFile(t)
 }
