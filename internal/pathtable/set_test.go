@@ -9,9 +9,12 @@ import (
 func TestSetAliasInfo(t *testing.T) {
 	client := makeTestClient()
 
+	project := makeProjectInfo()
 	goAlias := makeGoAliasInfo()
 
-	err := client.Set(testLocation, goAlias)
+	project.Commands = append(project.Commands, goAlias)
+
+	err := client.Set(testLocation, project)
 	require.NoError(t, err)
 
 	removeTestLocationFile(t)

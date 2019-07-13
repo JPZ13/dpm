@@ -7,3 +7,10 @@ type AliasInfo struct {
 	BinaryLocation string          `json:"binaryLocation"`
 	VolumeName     string          `json:"volumeName"`
 }
+
+// ProjectInfo holds configuration information
+// about a project
+type ProjectInfo struct {
+	IsActive bool        `json:"isActive"`
+	Commands []AliasInfo `json:"commands"`
+}
