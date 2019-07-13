@@ -1,0 +1,39 @@
+#!/bin/bash
+
+PKG_NAME=github.com/JPZ13/dpm
+GO_VERSION=1.12
+GO="docker run -it --rm -v ${PWD}:/go/src/$(echo $PKG_NAME) -w /go/src/$(echo $PKG_NAME) -e GOOS -e GOARCH golang:$(echo $GO_VERSION) go"
+
+clean_binaries() {
+  rm -rf ./build/
+}
+
+make_binary() {
+  GOOS=$1 GOARCH=amd64 $(echo $GO) \
+    build -v -o build/dpm-$2-x86_64
+}
+
+run_on_go_files() {
+  $(echo $GO) "$@" ./...
+}
+
+for arg in "$@"
+do
+  case $arg in
+    make-linux-binary)
+      make_binary linux Linux
+    ;;
+    make-mac-binary)
+      make_binary darwin Mac
+    ;;
+    clean)
+      clean_binaries
+    ;;
+    test)
+      run_on_go_files test -v
+    ;;
+    fmt)
+      run_on_go_files fmt
+    ;;
+  esac
+done
