@@ -2,7 +2,7 @@ package pathtable
 
 // Client is the interface for pathtable methods
 type Client interface {
-	Get(path string) ([]AliasInfo, error)
+	Get(path string) (*ProjectInfo, error)
 	Set(path string, info ProjectInfo) error
 }
 
