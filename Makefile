@@ -1,30 +1,30 @@
-PKG_NAME := github.com/JPZ13/dpm
-GO := docker run -it --rm -v ${PWD}:/go/src/$(PKG_NAME) -w /go/src/$(PKG_NAME) -e GOOS -e GOARCH golang:1.12 go
-GLIDE := docker run -it --rm -v ${PWD}:/run/context -w /run/context dockerepo/glide
-
-.PHONY: all clean binaries linux-binary mac-binary fmt glide-init glide-install glide-update
-
-all: binaries
-
+.PHONY: clean
 clean:
-	rm -fr build/
+	@echo "====== Cleaning build directory ======"
+	./makecmd clean
 
-binaries: linux-binary mac-binary
+.PHONY: binaries
+binaries:
+	@echo "====== Making binaries ======"
+	./makecmd make-mac-binary
+	./makecmd make-linux-binary
 
-linux-binary:
-	GOOS=linux GOARCH=amd64 $(GO) build -v -o build/dpm-Linux-x86_64
-
+.PHONY: mac-binary
 mac-binary:
-	GOOS=darwin GOARCH=amd64 $(GO) build -v -o build/dpm-Darwin-x86_64
+	@echo "====== Making Mac binary ======"
+	./makecmd make-mac-binary
 
+.PHONY: linux-binary
+linux-binary:
+	@echo "====== Making Linux binary ======"
+	./makecmd make-linux-binary
+
+.PHONY: test
+test:
+	@echo "====== Running project tests ======"
+	./makecmd test
+
+.PHONY: fmt
 fmt:
-	$(GO) fmt ./...
-
-glide-init:
-	$(GLIDE) init
-
-glide-install:
-	$(GLIDE) install
-
-glide-update:
-	$(GLIDE) update
+	@echo "====== Formatting project code ======"
+	./makecmd fmt
