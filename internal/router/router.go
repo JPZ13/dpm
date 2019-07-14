@@ -8,7 +8,8 @@ import (
 
 // Router holds public methods for a router
 type Router interface {
-	// Has(alias string) (bool, error)
+	Has(alias string) (bool, error)
+	Add(alias string) error
 }
 
 type router struct {
@@ -22,10 +23,10 @@ func NewRouter(config *Config) Router {
 	}
 }
 
-func (r *router) ensureDirectory() error {
+func (r *router) ensureBaseDirectory() error {
 	doesExist, err := utils.DoesFileExist(r.baseDirectory)
 	if !doesExist {
-		return os.Mkdir(r.baseDirectory, utils.WriteMode)
+		return os.MkdirAll(r.baseDirectory, utils.WriteMode)
 	}
 
 	return err
