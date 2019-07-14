@@ -15,3 +15,7 @@ func (c *client) getDigestFromPath(location string) (string, error) {
 	fullPath := path.Join(c.baseDirectory, digest)
 	return fullPath, nil
 }
+
+func (c *client) ensureBaseDirectory() error {
+	return utils.EnsureDirectory(c.baseDirectory)
+}

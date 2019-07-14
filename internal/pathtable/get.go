@@ -10,9 +10,13 @@ import (
 
 // Get retrieves blobs given an input path
 func (c *client) Get(location string) (*ProjectInfo, error) {
+	err := c.ensureBaseDirectory()
+	if err != nil {
+		return nil, err
+	}
+
 	// bubble up path checking for matches in basedirectory
 	var digest string
-	var err error
 	for location != "/" {
 		digest, err = c.getDigestFromPath(location)
 		if err != nil {
