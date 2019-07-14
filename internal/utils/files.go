@@ -58,7 +58,7 @@ func EnsureDirectoryForFile(location string) error {
 	_, err := os.Stat(directory)
 
 	if os.IsNotExist(err) {
-		return os.Mkdir(directory, WriteMode)
+		return os.MkdirAll(directory, WriteMode)
 	}
 
 	return err
