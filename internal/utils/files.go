@@ -55,10 +55,16 @@ func WriteFileBytes(filename string, bytes []byte) error {
 // if it does not exist
 func EnsureDirectoryForFile(location string) error {
 	directory := path.Dir(location)
-	_, err := os.Stat(directory)
+	return EnsureDirectory(directory)
+}
+
+// EnsureDirectory creates a directory if one does
+// not exist
+func EnsureDirectory(folderLocation string) error {
+	_, err := os.Stat(folderLocation)
 
 	if os.IsNotExist(err) {
-		return os.MkdirAll(directory, WriteMode)
+		return os.MkdirAll(folderLocation, WriteMode)
 	}
 
 	return err
