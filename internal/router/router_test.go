@@ -3,6 +3,8 @@ package router
 import "testing"
 
 func TestRouter(t *testing.T) {
+	defer cleanTestOutput(t)
+
 	rtr := makeTestRouter()
 
 	testHas(t, rtr, "dne", false)
@@ -13,6 +15,4 @@ func TestRouter(t *testing.T) {
 	// gracefully handle second add
 	testAdd(t, rtr, "go")
 	testHas(t, rtr, "go", true)
-
-	cleanTestOutput(t)
 }
