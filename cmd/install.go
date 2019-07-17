@@ -58,8 +58,7 @@ func maybeMakeDotDPMFolder() error {
 
 	ok, err := utils.DoesFileExist(dpmFolder)
 	if !ok {
-		os.MkdirAll(dpmFolder, utils.WriteMode)
-		return nil
+		return os.MkdirAll(dpmFolder, utils.WriteMode)
 	}
 
 	return err
