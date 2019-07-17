@@ -3,13 +3,66 @@ package install
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/JPZ13/dpm/internal/parser"
 	"github.com/JPZ13/dpm/internal/project"
 	"github.com/JPZ13/dpm/internal/utils"
 )
+
+// LegacyInstallCommand is the old install command logic
+func LegacyInstallCommand(args []string) {
+	if !project.IsProjectInitialized() {
+		log.Fatal("error: no `dpm.yml` file found\n")
+	}
+
+	err := os.RemoveAll(project.ProjectCmdPath)
+	utils.HandleFatalError(err)
+
+	err = maybeMakeDotDPMFolder()
+	utils.HandleFatalError(err)
+
+	err = os.MkdirAll(project.ProjectCmdPath, 0755)
+	utils.HandleFatalError(err)
+
+	if len(args) > 0 {
+		err = installListedPackages(args)
+		utils.HandleFatalError(err)
+	}
+
+	err = YAMLPackages()
+	utils.HandleFatalError(err)
+}
+
+// maybeMakeDotDPMFolder ensures that there is a .dpm
+// folder in the home directory
+func maybeMakeDotDPMFolder() error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	dpmFolder := filepath.Join(homeDir, project.DotDPMFolder)
+
+	ok, err := utils.DoesFileExist(dpmFolder)
+	if !ok {
+		return os.MkdirAll(dpmFolder, utils.WriteMode)
+	}
+
+	return err
+}
+
+// installListedPackages adds packages listed after
+// install on the CLI to the dpm.yml file
+func installListedPackages(packages []string) error {
+	commands := parser.GetCommandsFromCLI(packages)
+
+	return parser.AddCommands(project.ProjectFilePath, commands)
+}
 
 // YAMLPackages writes bash scripts for
 // each of the commands listed in the dpm.yml file
