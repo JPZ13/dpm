@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/JPZ13/dpm/cmd/install"
 	"github.com/JPZ13/dpm/internal/parser"
 	"github.com/JPZ13/dpm/internal/project"
 	"github.com/JPZ13/dpm/internal/utils"
@@ -31,7 +32,7 @@ var uninstallCmd = &cobra.Command{
 			err := uninstallListedPackages(args)
 			utils.HandleFatalError(err)
 
-			err = installYAMLPackages()
+			err = install.YAMLPackages()
 			utils.HandleFatalError(err)
 		}
 	},
