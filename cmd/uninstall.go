@@ -1,21 +1,11 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/JPZ13/dpm/cmd/install"
-	"github.com/JPZ13/dpm/internal/parser"
-	"github.com/JPZ13/dpm/internal/project"
-	"github.com/JPZ13/dpm/internal/utils"
+	"github.com/JPZ13/dpm/cmd/uninstall"
 	"github.com/spf13/cobra"
 )
 
-var forceUninstall bool
-
 func init() {
-	uninstallCmd.Flags().BoolVarP(&forceUninstall, "force", "f", false,
-		"Force uninstall even if project is currently active")
 	RootCmd.AddCommand(uninstallCmd)
 }
 
@@ -23,38 +13,6 @@ var uninstallCmd = &cobra.Command{
 	Use:   "uninstall",
 	Short: "Uninstalls all commands for the current project",
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: add option to remove images
-		// will need to implement something that shows what
-		// images are used by each project
-		if len(args) == 0 {
-			uninstallAll()
-		} else {
-			err := uninstallListedPackages(args)
-			utils.HandleFatalError(err)
-
-			err = install.YAMLPackages()
-			utils.HandleFatalError(err)
-		}
+		uninstall.LegacyUninstallCommand(args)
 	},
-}
-
-func uninstallAll() {
-	err := os.RemoveAll(project.ProjectCmdPath)
-	utils.HandleFatalError(err)
-
-	fmt.Println("All commands uninstalled")
-}
-
-func uninstallListedPackages(packages []string) error {
-	commands := parser.GetCommands(project.ProjectFilePath)
-
-	for _, pkg := range packages {
-		if _, ok := commands[pkg]; ok {
-			delete(commands, pkg)
-			continue
-		}
-		return fmt.Errorf("Command %s not in project", pkg)
-	}
-
-	return parser.UpdateCommands(project.ProjectFilePath, commands)
 }
