@@ -3,9 +3,10 @@ package pathtable
 // AliasInfo contains info on CLI commands
 // that will be run in containers
 type AliasInfo struct {
-	Aliases        map[string]bool `json:"aliases"`
-	BinaryLocation string          `json:"binaryLocation"`
-	VolumeName     string          `json:"volumeName"`
+	Aliases        map[string]string `json:"aliases"`
+	Image          string            `json:"image"`
+	VolumeName     string            `json:"volumeName"`
+	BinaryLocation string            `json:"binaryLocation"`
 }
 
 // ProjectInfo holds configuration information
