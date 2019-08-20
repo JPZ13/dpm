@@ -5,6 +5,7 @@ import (
 	"github.com/JPZ13/dpm/cmd/deactivate"
 	"github.com/JPZ13/dpm/cmd/install"
 	"github.com/JPZ13/dpm/cmd/list"
+	"github.com/JPZ13/dpm/cmd/run"
 	"github.com/JPZ13/dpm/cmd/status"
 	"github.com/JPZ13/dpm/cmd/uninstall"
 	"github.com/spf13/cobra"
@@ -17,6 +18,7 @@ func init() {
 	RootCmd.AddCommand(listCmd)
 	RootCmd.AddCommand(statusCmd)
 	RootCmd.AddCommand(uninstallCmd)
+	RootCmd.AddCommand(runCmd)
 }
 
 // RootCmd is the base Cobra command for the CLI
@@ -62,6 +64,14 @@ var statusCmd = &cobra.Command{
 	Short: "Shows the current project status",
 	Run: func(cmd *cobra.Command, args []string) {
 		status.LegacyStatusCommand()
+	},
+}
+
+var runCmd = &cobra.Command{
+	Use:   "run",
+	Short: "Run an alias that is defined in the dpm yaml file",
+	Run: func(cmd *cobra.Command, args []string) {
+		run.Command(args)
 	},
 }
 

@@ -22,28 +22,28 @@ func makeTestClient() Client {
 }
 
 func makeGoAliasInfo() AliasInfo {
-	goAliases := map[string]bool{
-		"go":     true,
-		"golang": true,
+	goAliases := map[string]string{
+		"go":     "/usr/local/bin",
+		"golang": "/usr/local/bin",
 	}
 
 	return AliasInfo{
-		Aliases:        goAliases,
-		BinaryLocation: "/usr/local/bin",
-		VolumeName:     "supple-leopard",
+		Aliases:    goAliases,
+		VolumeName: "supple-leopard",
+		Image:      "golang:1.12",
 	}
 }
 
 func makePythonAliasInfo() AliasInfo {
-	pythonAliases := map[string]bool{
-		"python": true,
-		"pip":    true,
+	pythonAliases := map[string]string{
+		"python": "/usr/local/bin",
+		"pip":    "/usr/local/bin",
 	}
 
 	return AliasInfo{
-		Aliases:        pythonAliases,
-		BinaryLocation: "/usr/local/bin",
-		VolumeName:     "crouching-tiger",
+		Aliases:    pythonAliases,
+		VolumeName: "crouching-tiger",
+		Image:      "python:3",
 	}
 }
 

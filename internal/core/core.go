@@ -5,31 +5,34 @@ import (
 	"github.com/JPZ13/dpm/internal/router"
 )
 
-// Core holds core methods
-type Core interface {
+// Service holds core methods
+type Service interface {
+	Runner
 }
 
-type core struct {
-	pathTable       pathtable.Client
-	router          router.Router
-	baseDirectory   string
-	routerDirectory string
+// Config holds service configuration
+type Config struct {
+	PathTable pathtable.Client
+	Router    router.Router
 }
 
-// NewCore inits a Core instance from a Config
-func NewCore(config *Config) Core {
-	pathTable := pathtable.NewClient(&pathtable.Config{
-		BaseDirectory: config.BaseDirectory,
-	})
+type service struct {
+	runner
+}
 
-	rtr := router.NewRouter(&router.Config{
-		BaseDirectory: config.RouterDirectory,
-	})
+type baseService struct {
+	pathTable pathtable.Client
+	router    router.Router
+}
 
-	return &core{
-		pathTable:       pathTable,
-		router:          rtr,
-		baseDirectory:   config.BaseDirectory,
-		routerDirectory: config.RouterDirectory,
+// New inits a core service
+func New(config *Config) Service {
+	base := baseService{
+		pathTable: config.PathTable,
+		router:    config.Router,
+	}
+
+	return &service{
+		runner{base},
 	}
 }
