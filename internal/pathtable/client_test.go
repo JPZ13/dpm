@@ -8,7 +8,7 @@ func TestPathTableClient(t *testing.T) {
 	project := makeProjectInfo()
 	goAlias := makeGoAliasInfo()
 
-	project.Commands = append(project.Commands, goAlias)
+	project.Commands = append(project.Commands, *goAlias)
 
 	testSet(t, client, project)
 

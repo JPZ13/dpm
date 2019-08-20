@@ -8,6 +8,7 @@ import (
 // Service holds core methods
 type Service interface {
 	Runner
+	Project
 }
 
 // Config holds service configuration
@@ -18,6 +19,7 @@ type Config struct {
 
 type service struct {
 	runner
+	project
 }
 
 type baseService struct {
@@ -34,5 +36,6 @@ func New(config *Config) Service {
 
 	return &service{
 		runner{base},
+		project{base},
 	}
 }

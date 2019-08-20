@@ -27,6 +27,6 @@ func writeAliasBashScript(location string, alias string) error {
 
 func makeAliasBashScript(alias string) string {
 	// TODO: modify to include the path of the caller
-	script := `dpm --plumbing run %s "$@"`
+	script := `dpm run %s "$@"`
 	return fmt.Sprintf(script, alias)
 }
