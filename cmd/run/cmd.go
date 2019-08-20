@@ -2,6 +2,7 @@ package run
 
 import (
 	"context"
+	"log"
 
 	"github.com/JPZ13/dpm/internal/core"
 	"github.com/JPZ13/dpm/internal/pathtable"
@@ -10,7 +11,7 @@ import (
 
 // Command is the top level command
 // for dpm run
-func Command(args []string) error {
+func Command(args []string) {
 	// TODO replace directories with config
 	pt := pathtable.NewClient(&pathtable.Config{
 		BaseDirectory: "~/.dpm",
@@ -26,5 +27,8 @@ func Command(args []string) error {
 	})
 
 	ctx := context.Background()
-	return core.Run(ctx, args)
+	err := core.Run(ctx, args)
+	if err != nil {
+		log.Fatalf("error: %s\n", err)
+	}
 }

@@ -18,6 +18,7 @@ func init() {
 	RootCmd.AddCommand(listCmd)
 	RootCmd.AddCommand(statusCmd)
 	RootCmd.AddCommand(uninstallCmd)
+	RootCmd.AddCommand(runCmd)
 }
 
 // RootCmd is the base Cobra command for the CLI
