@@ -2,7 +2,7 @@
 
 PKG_NAME=github.com/JPZ13/dpm
 GO_VERSION=1.12
-GO="docker run -it --rm -v ${PWD}:/go/src/$(echo $PKG_NAME) -w /go/src/$(echo $PKG_NAME) -e GOOS -e GOARCH golang:$(echo $GO_VERSION) go"
+GO="docker run -it --rm -v ${PWD}:/go/src/$(echo $PKG_NAME) -w /go/src/$(echo $PKG_NAME) -e GOOS -e GO111MODULE=on -e GOARCH golang:$(echo $GO_VERSION) go"
 
 clean_binaries() {
   rm -rf ./build/
