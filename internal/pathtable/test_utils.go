@@ -5,6 +5,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/JPZ13/dpm/internal/model"
 	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -21,36 +22,36 @@ func makeTestClient() Client {
 	})
 }
 
-func makeGoAliasInfo() AliasInfo {
+func makeGoAliasInfo() *model.AliasInfo {
 	goAliases := map[string]string{
 		"go":     "/usr/local/bin",
 		"golang": "/usr/local/bin",
 	}
 
-	return AliasInfo{
+	return &model.AliasInfo{
 		Aliases:    goAliases,
 		VolumeName: "supple-leopard",
 		Image:      "golang:1.12",
 	}
 }
 
-func makePythonAliasInfo() AliasInfo {
+func makePythonAliasInfo() *model.AliasInfo {
 	pythonAliases := map[string]string{
 		"python": "/usr/local/bin",
 		"pip":    "/usr/local/bin",
 	}
 
-	return AliasInfo{
+	return &model.AliasInfo{
 		Aliases:    pythonAliases,
 		VolumeName: "crouching-tiger",
 		Image:      "python:3",
 	}
 }
 
-func makeProjectInfo() ProjectInfo {
-	return ProjectInfo{
+func makeProjectInfo() *model.ProjectInfo {
+	return &model.ProjectInfo{
 		IsActive: true,
-		Commands: []AliasInfo{},
+		Commands: []model.AliasInfo{},
 	}
 }
 

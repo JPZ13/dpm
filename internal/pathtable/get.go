@@ -5,11 +5,12 @@ import (
 	"errors"
 	"path"
 
+	"github.com/JPZ13/dpm/internal/model"
 	"github.com/JPZ13/dpm/internal/utils"
 )
 
 // Get retrieves blobs given an input path
-func (c *client) Get(location string) (*ProjectInfo, error) {
+func (c *client) Get(location string) (*model.ProjectInfo, error) {
 	err := c.ensureBaseDirectory()
 	if err != nil {
 		return nil, err
@@ -46,13 +47,13 @@ func (c *client) Get(location string) (*ProjectInfo, error) {
 	return getProjectInfoAtPath(digest)
 }
 
-func getProjectInfoAtPath(location string) (*ProjectInfo, error) {
+func getProjectInfoAtPath(location string) (*model.ProjectInfo, error) {
 	bytes, err := utils.GetFileBytes(location)
 	if err != nil {
 		return nil, err
 	}
 
-	var projectInfo ProjectInfo
+	var projectInfo model.ProjectInfo
 	err = json.Unmarshal(bytes, &projectInfo)
 	if err != nil {
 		return nil, err

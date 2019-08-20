@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/JPZ13/dpm/internal/pathtable"
+	"github.com/JPZ13/dpm/internal/model"
 )
 
 // Runner holds methods related to running
@@ -40,7 +40,7 @@ func (r *runner) Run(ctx context.Context, args []string) error {
 }
 
 // callBinary calls the stored binary of an alias
-func callBinary(args []string, project *pathtable.ProjectInfo) error {
+func callBinary(args []string, project *model.ProjectInfo) error {
 	command := args[0]
 	remainder := args[1:]
 
@@ -59,7 +59,7 @@ func callBinary(args []string, project *pathtable.ProjectInfo) error {
 	return errors.New("Native binary not found")
 }
 
-func runDockerizedCommand(args []string, project *pathtable.ProjectInfo) error {
+func runDockerizedCommand(args []string, project *model.ProjectInfo) error {
 	command := args[0]
 
 	for _, aliasInfo := range project.Commands {
@@ -74,7 +74,7 @@ func runDockerizedCommand(args []string, project *pathtable.ProjectInfo) error {
 	return errors.New("Project error: alias not found")
 }
 
-func runDocker(args []string, alias *pathtable.AliasInfo) error {
+func runDocker(args []string, alias *model.AliasInfo) error {
 	// create named volume if it doesn't exist
 	err := maybeCreateVolume(alias.VolumeName)
 	if err != nil {

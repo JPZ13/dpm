@@ -1,6 +1,13 @@
 package core
 
-import "context"
+import (
+	"context"
+	"io/ioutil"
+	"os"
+
+	"github.com/JPZ13/dpm/internal/model"
+	"gopkg.in/yaml.v2"
+)
 
 // Project holds methods related to configuring
 // a project
@@ -14,5 +21,57 @@ type project struct {
 
 // InstallProject installs a project from a dpm file but does not activate it
 func (p *project) InstallProject(ctx context.Context, dpmFileLocation string) error {
+	// parse dpm file
+	dpmFile := &model.DPMFile{}
+	err := parseYAMLFile(dpmFileLocation, dpmFile)
+	if err != nil {
+		return err
+	}
+
+	// translate to project info
+	projectInfo, err := translateDPMFileToProjectInfo(dpmFile)
+	if err != nil {
+		return err
+	}
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	// set project info
+	err = p.pathTable.Set(pwd, projectInfo)
+	if err != nil {
+		return err
+	}
+
+	// add all aliases
+	return p.addAliasesToRouter(projectInfo)
+}
+
+func parseYAMLFile(location string, obj interface{}) error {
+	fileBytes, err := ioutil.ReadFile(location)
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(fileBytes, obj)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *project) addAliasesToRouter(projectInfo *model.ProjectInfo) error {
+	for _, aliasInfo := range projectInfo.Commands {
+		for alias := range aliasInfo.Aliases {
+			err := p.router.Add(alias)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }

@@ -3,12 +3,13 @@ package pathtable
 import (
 	"encoding/json"
 
+	"github.com/JPZ13/dpm/internal/model"
 	"github.com/JPZ13/dpm/internal/utils"
 )
 
 // Set puts the blob at a hashed string
 // of the path within the base directory
-func (c *client) Set(path string, info ProjectInfo) error {
+func (c *client) Set(path string, info *model.ProjectInfo) error {
 	err := c.ensureBaseDirectory()
 	if err != nil {
 		return err
@@ -19,7 +20,7 @@ func (c *client) Set(path string, info ProjectInfo) error {
 		return err
 	}
 
-	bytes, err := json.Marshal(info)
+	bytes, err := json.Marshal(*info)
 	if err != nil {
 		return err
 	}
