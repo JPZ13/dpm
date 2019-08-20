@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"io/ioutil"
-	"os"
 
 	"github.com/JPZ13/dpm/internal/model"
 	"gopkg.in/yaml.v2"
@@ -19,7 +18,7 @@ type project struct {
 	baseService
 }
 
-// InstallProject installs a project from a dpm file but does not activate it
+// InstallProject installs a project from a dpm file and activates it
 func (p *project) InstallProject(ctx context.Context, dpmFileLocation string) error {
 	// parse dpm file
 	dpmFile := &model.DPMFile{}
@@ -34,13 +33,10 @@ func (p *project) InstallProject(ctx context.Context, dpmFileLocation string) er
 		return err
 	}
 
-	pwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
+	projectInfo.IsActive = true
 
 	// set project info
-	err = p.pathTable.Set(pwd, projectInfo)
+	err = p.pathTable.Set(dpmFileLocation, projectInfo)
 	if err != nil {
 		return err
 	}

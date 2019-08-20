@@ -32,6 +32,7 @@ var activateCmd = &cobra.Command{
 	Short: "Activates the project in the current shell",
 	Run: func(cmd *cobra.Command, args []string) {
 		activate.LegacyActivateCommand()
+		activate.Command(args)
 	},
 }
 
@@ -48,6 +49,7 @@ var installCmd = &cobra.Command{
 	Short: "Installs all commands defined in dpm.yml in the current project",
 	Run: func(cmd *cobra.Command, args []string) {
 		install.LegacyInstallCommand(args)
+		activate.Command(args)
 	},
 }
 
