@@ -19,13 +19,13 @@ func Command(args []string) {
 	ctx := context.Background()
 	pwd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("DPM error: %s", err)
+		log.Fatalf("DPM error getting pwd: %s", err)
 	}
 
 	dpmLocation := path.Join(pwd, "dpm.yml")
 
 	err = core.InstallProject(ctx, dpmLocation)
 	if err != nil {
-		log.Fatalf("DPM error: %s", err)
+		log.Fatalf("DPM error installing project: %s", err)
 	}
 }
