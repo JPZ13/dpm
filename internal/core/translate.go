@@ -46,24 +46,34 @@ func translateEntrypointsToAliasTable(entrypoints *[]string) (*map[string]string
 			return nil, err
 		}
 
-		aliasTable[entrypoint] = *binaryLocation
+		aliasTable[entrypoint] = binaryLocation
 	}
 
 	return &aliasTable, nil
 }
 
-func getBinaryLocation(entrypoint string) (*string, error) {
+func getBinaryLocation(entrypoint string) (string, error) {
 	cmd := exec.Command("which", entrypoint)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
 	err := cmd.Run()
-	if err != nil {
-		return nil, err
+	if err != nil && isCommandNotFoundError(err) {
+		return "", nil
+	} else if err != nil {
+		return "", err
 	}
 
 	location := out.String()
 
-	return &location, nil
+	return location, nil
+}
+
+func isCommandNotFoundError(err error) bool {
+	if err.Error() == "exit status 1" {
+		return true
+	}
+
+	return false
 }
