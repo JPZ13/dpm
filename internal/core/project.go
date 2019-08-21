@@ -12,6 +12,7 @@ import (
 // a project
 type Project interface {
 	InstallProject(ctx context.Context, dpmFileLocation string) error
+	DeactivateProject(ctx context.Context, dpmFileLocation string) error
 }
 
 type project struct {
@@ -70,4 +71,17 @@ func (p *project) addAliasesToRouter(projectInfo *model.ProjectInfo) error {
 	}
 
 	return nil
+}
+
+// DeactivateProject sets deactivates the project by
+// setting IsActive to false in the project info json
+func (p *project) DeactivateProject(ctx context.Context, dpmFileLocation string) error {
+	projectInfo, err := p.pathTable.Get(dpmFileLocation)
+	if err != nil {
+		return err
+	}
+
+	projectInfo.IsActive = false
+
+	return p.pathTable.Set(dpmFileLocation, projectInfo)
 }
