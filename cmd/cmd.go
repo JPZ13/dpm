@@ -41,6 +41,7 @@ var deactivateCmd = &cobra.Command{
 	Short: "Deactivates the project in the current shell",
 	Run: func(cmd *cobra.Command, args []string) {
 		deactivate.LegacyDeactivateCommand()
+		deactivate.Command(args)
 	},
 }
 
