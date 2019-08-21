@@ -5,25 +5,15 @@ import (
 	"log"
 	"os"
 
-	"github.com/JPZ13/dpm/internal/core"
-	"github.com/JPZ13/dpm/internal/pathtable"
-	"github.com/JPZ13/dpm/internal/router"
+	"github.com/JPZ13/dpm/cmd/tools"
 )
 
 // Command houses the deactivate command
 func Command(args []string) {
-	pt := pathtable.NewClient(&pathtable.Config{
-		BaseDirectory: "~/.dpm",
-	})
-
-	rtr := router.NewRouter(&router.Config{
-		BaseDirectory: "~/.dpm/router",
-	})
-
-	core := core.New(&core.Config{
-		PathTable: pt,
-		Router:    rtr,
-	})
+	core, err := tools.MakeCoreInHomeDirectory()
+	if err != nil {
+		log.Fatalf("error: %s\n", err)
+	}
 
 	ctx := context.Background()
 	pwd, err := os.Getwd()
