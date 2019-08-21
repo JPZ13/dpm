@@ -1,8 +1,0 @@
-commands:
-  glide:
-    image: dockerepo/glide
-  go:
-    image: golang:1.7.5
-    context: /go/src/github.com/JPZ13/dpm
-  python:
-    image: python:latest
