@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"io/ioutil"
+	"path"
 
 	"github.com/JPZ13/dpm/internal/model"
 	"gopkg.in/yaml.v2"
@@ -12,7 +13,7 @@ import (
 // a project
 type Project interface {
 	InstallProject(ctx context.Context, dpmFileLocation string) error
-	DeactivateProject(ctx context.Context, dpmFileLocation string) error
+	DeactivateProject(ctx context.Context, pwd string) error
 }
 
 type project struct {
@@ -37,7 +38,9 @@ func (p *project) InstallProject(ctx context.Context, dpmFileLocation string) er
 	projectInfo.IsActive = true
 
 	// set project info
-	err = p.pathTable.Set(dpmFileLocation, projectInfo)
+	dpmDir := path.Dir(dpmFileLocation)
+
+	err = p.pathTable.Set(dpmDir, projectInfo)
 	if err != nil {
 		return err
 	}
@@ -75,13 +78,13 @@ func (p *project) addAliasesToRouter(projectInfo *model.ProjectInfo) error {
 
 // DeactivateProject sets deactivates the project by
 // setting IsActive to false in the project info json
-func (p *project) DeactivateProject(ctx context.Context, dpmFileLocation string) error {
-	projectInfo, err := p.pathTable.Get(dpmFileLocation)
+func (p *project) DeactivateProject(ctx context.Context, pwd string) error {
+	projectInfo, err := p.pathTable.Get(pwd)
 	if err != nil {
 		return err
 	}
 
 	projectInfo.IsActive = false
 
-	return p.pathTable.Set(dpmFileLocation, projectInfo)
+	return p.pathTable.Set(pwd, projectInfo)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"path"
 
 	"github.com/JPZ13/dpm/internal/core"
 	"github.com/JPZ13/dpm/internal/pathtable"
@@ -32,9 +31,7 @@ func Command(args []string) {
 		log.Fatalf("DPM error: %s", err)
 	}
 
-	dpmLocation := path.Join(pwd, "dpm.yml")
-
-	err = core.DeactivateProject(ctx, dpmLocation)
+	err = core.DeactivateProject(ctx, pwd)
 	if err != nil {
 		log.Fatalf("DPM error: %s", err)
 	}
