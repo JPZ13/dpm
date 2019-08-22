@@ -91,8 +91,40 @@ func runDocker(args []string, alias *model.AliasInfo) error {
 	}
 
 	// run volume mounted container container
+	container, err := runContainer(dockerClient, alias.Image, volume)
+	if err != nil {
+		return err
+	}
+
 	remainder := args[1:]
-	return runContainer(dockerClient, alias.Image, volume, remainder)
+	return attachToContainer(dockerClient, container, remainder)
+}
+
+func attachToContainer(dockerClient *docker.Client, container *container.ContainerCreateCreatedBody, remainder []string) error {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	exec, err := dockerClient.ContainerExecCreate(ctx, container.ID, types.ExecConfig{
+		Tty:          true,
+		AttachStdin:  true,
+		AttachStderr: true,
+		AttachStdout: true,
+		WorkingDir:   pwd,
+		Cmd:          remainder,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = dockerClient.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+		Detach: false,
+		Tty:    true,
+	})
+
+	return err
 }
 
 func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*types.Volume, error) {
@@ -118,16 +150,15 @@ func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*types.V
 	return &volume, nil
 }
 
-func runContainer(dockerClient *docker.Client, imageName string, volume *types.Volume, remainder []string) error {
+func runContainer(dockerClient *docker.Client, imageName string, volume *types.Volume) (*container.ContainerCreateCreatedBody, error) {
 	pwd, err := os.Getwd()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ctx := context.Background()
 	container, err := dockerClient.ContainerCreate(ctx, &container.Config{
 		Image:        imageName,
-		Cmd:          remainder,
 		Tty:          true,
 		AttachStdin:  true,
 		AttachStdout: true,
@@ -139,13 +170,13 @@ func runContainer(dockerClient *docker.Client, imageName string, volume *types.V
 		},
 	}, nil, "")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = dockerClient.ContainerStart(ctx, container.ID, types.ContainerStartOptions{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &container, nil
 }
