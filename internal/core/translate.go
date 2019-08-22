@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"os/exec"
+	"strings"
 
 	"github.com/JPZ13/dpm/internal/model"
 )
@@ -66,6 +67,7 @@ func getBinaryLocation(entrypoint string) (string, error) {
 	}
 
 	location := out.String()
+	location = strings.TrimSuffix(location, "\n")
 
 	return location, nil
 }
