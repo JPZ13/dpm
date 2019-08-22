@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 
@@ -123,6 +124,9 @@ func attachToContainer(dockerClient *docker.Client, container *container.Contain
 		Detach: false,
 		Tty:    true,
 	})
+	if err != nil {
+		return err
+	}
 	defer resp.Close()
 
 	_, err = io.Copy(os.Stdout, resp.Reader)
@@ -159,6 +163,11 @@ func runContainer(dockerClient *docker.Client, imageName string, volume *types.V
 		return nil, err
 	}
 
+	err = pullImageIfNotInDockerHost(dockerClient, imageName)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx := context.Background()
 	container, err := dockerClient.ContainerCreate(ctx, &container.Config{
 		Image:        imageName,
@@ -182,4 +191,35 @@ func runContainer(dockerClient *docker.Client, imageName string, volume *types.V
 	}
 
 	return &container, nil
+}
+
+func pullImageIfNotInDockerHost(dockerClient *docker.Client, imageName string) error {
+	ctx := context.Background()
+	images, err := dockerClient.ImageList(ctx, types.ImageListOptions{})
+	if err != nil {
+		return err
+	}
+
+	// don't pull if image already in host
+	for _, image := range images {
+		for _, repoTag := range image.RepoTags {
+			if repoTag == imageName {
+				return nil
+			}
+		}
+	}
+
+	reader, err := dockerClient.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := reader.Close(); err != nil {
+			log.Println("Error: ", err)
+		}
+	}()
+
+	_, err = io.Copy(os.Stdout, reader)
+
+	return err
 }
