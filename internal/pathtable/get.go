@@ -9,6 +9,9 @@ import (
 	"github.com/JPZ13/dpm/internal/utils"
 )
 
+// ErrNotFound signals that the project was not found
+var ErrNotFound = errors.New("Project info file not found")
+
 // Get retrieves blobs given an input path
 func (c *client) Get(location string) (*model.ProjectInfo, error) {
 	err := c.ensureBaseDirectory()
@@ -40,7 +43,7 @@ func (c *client) Get(location string) (*model.ProjectInfo, error) {
 
 		hasFile, _ := utils.DoesFileExist(digest)
 		if !hasFile {
-			return nil, errors.New("Alias info file not found")
+			return nil, ErrNotFound
 		}
 	}
 

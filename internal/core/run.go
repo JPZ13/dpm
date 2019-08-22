@@ -8,8 +8,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
+	"strings"
 
 	"github.com/JPZ13/dpm/internal/model"
+	"github.com/JPZ13/dpm/internal/pathtable"
+	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/volume"
@@ -35,6 +39,10 @@ func (r *runner) Run(ctx context.Context, args []string) error {
 
 	projectInfo, err := r.pathTable.Get(pwd)
 	if err != nil {
+		if err == pathtable.ErrNotFound {
+			return runBinaryFromPATH(args)
+		}
+
 		return err
 	}
 
@@ -43,6 +51,38 @@ func (r *runner) Run(ctx context.Context, args []string) error {
 	}
 
 	return runDockerizedCommand(args, projectInfo)
+}
+
+func runBinaryFromPATH(args []string) error {
+	userPath := os.Getenv("PATH")
+
+	subPaths := strings.Split(userPath, ":")
+
+	for _, subPath := range subPaths {
+		if strings.Contains(subPath, ".dpm") {
+			continue
+		}
+
+		cmd := args[0]
+		binaryPath := path.Join(subPath, cmd)
+		doesExist, _ := utils.DoesFileExist(binaryPath)
+		if doesExist {
+			remainder := args[1:]
+			return runShellCommand(binaryPath, remainder...)
+		}
+	}
+
+	return errors.New("command not found")
+}
+
+// runShellCommand is a helper function for running commands
+// on the terminal
+func runShellCommand(cmdName string, args ...string) error {
+	command := exec.Command(cmdName, args...)
+	command.Stdin = os.Stdin
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	return command.Run()
 }
 
 // callBinary calls the stored binary of an alias
@@ -57,8 +97,7 @@ func callBinary(args []string, project *model.ProjectInfo) error {
 			}
 
 			// execute command of binary and remainder
-			cmd := exec.Command(binaryPath, remainder...)
-			return cmd.Run()
+			return runShellCommand(binaryPath, remainder...)
 		}
 	}
 
