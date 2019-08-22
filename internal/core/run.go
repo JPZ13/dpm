@@ -3,11 +3,15 @@ package core
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/JPZ13/dpm/internal/model"
-	docker "github.com/fsouza/go-dockerclient"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/volume"
+	docker "github.com/docker/docker/client"
 )
 
 // Runner holds methods related to running
@@ -75,7 +79,7 @@ func runDockerizedCommand(args []string, project *model.ProjectInfo) error {
 }
 
 func runDocker(args []string, alias *model.AliasInfo) error {
-	dockerClient, err := docker.NewClientFromEnv()
+	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
 		return err
 	}
@@ -91,13 +95,14 @@ func runDocker(args []string, alias *model.AliasInfo) error {
 	return runContainer(dockerClient, alias.Image, volume, remainder)
 }
 
-func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*docker.Volume, error) {
+func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*types.Volume, error) {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
 
-	volume, err := dockerClient.CreateVolume(docker.CreateVolumeOptions{
+	ctx := context.Background()
+	volume, err := dockerClient.VolumeCreate(ctx, volume.VolumeCreateBody{
 		Driver: "local",
 		DriverOpts: map[string]string{
 			"type":   "none",
@@ -110,32 +115,37 @@ func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*docker.
 		return nil, err
 	}
 
-	return volume, nil
+	return &volume, nil
 }
 
-func runContainer(dockerClient *docker.Client, imageName string, volume *docker.Volume, remainder []string) error {
+func runContainer(dockerClient *docker.Client, imageName string, volume *types.Volume, remainder []string) error {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	container, err := dockerClient.CreateContainer(docker.CreateContainerOptions{
-		Config: &docker.Config{
-			Image:        imageName,
-			Cmd:          remainder,
-			Tty:          true,
-			AttachStdin:  true,
-			AttachStdout: true,
-			AttachStderr: true,
-			WorkingDir:   pwd,
-			// Volumes: map[string]struct{}{
-			// 	volume.Name: *volume,
-			// },
+	ctx := context.Background()
+	container, err := dockerClient.ContainerCreate(ctx, &container.Config{
+		Image:        imageName,
+		Cmd:          remainder,
+		Tty:          true,
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		WorkingDir:   pwd,
+	}, &container.HostConfig{
+		Binds: []string{
+			fmt.Sprintf("%s:%s", volume.Name, pwd),
 		},
-	})
+	}, nil, "")
 	if err != nil {
 		return err
 	}
 
-	return dockerClient.StartContainer(container.ID, nil)
+	err = dockerClient.ContainerStart(ctx, container.ID, types.ContainerStartOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
