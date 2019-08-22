@@ -68,14 +68,21 @@ func runBinaryFromPATH(args []string) error {
 		doesExist, _ := utils.DoesFileExist(binaryPath)
 		if doesExist {
 			remainder := args[1:]
-			command := exec.Command(binaryPath, remainder...)
-			command.Stdout = os.Stdout
-			command.Stderr = os.Stderr
-			return command.Run()
+			return runShellCommand(binaryPath, remainder...)
 		}
 	}
 
 	return errors.New("command not found")
+}
+
+// runShellCommand is a helper function for running commands
+// on the terminal
+func runShellCommand(cmdName string, args ...string) error {
+	command := exec.Command(cmdName, args...)
+	command.Stdin = os.Stdin
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	return command.Run()
 }
 
 // callBinary calls the stored binary of an alias
@@ -90,8 +97,7 @@ func callBinary(args []string, project *model.ProjectInfo) error {
 			}
 
 			// execute command of binary and remainder
-			cmd := exec.Command(binaryPath, remainder...)
-			return cmd.Run()
+			return runShellCommand(binaryPath, remainder...)
 		}
 	}
 
