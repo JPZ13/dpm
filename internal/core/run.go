@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 
@@ -123,6 +124,9 @@ func attachToContainer(dockerClient *docker.Client, container *container.Contain
 		Detach: false,
 		Tty:    true,
 	})
+	if err != nil {
+		return err
+	}
 	defer resp.Close()
 
 	_, err = io.Copy(os.Stdout, resp.Reader)
@@ -209,7 +213,11 @@ func pullImageIfNotInDockerHost(dockerClient *docker.Client, imageName string) e
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
+	defer func() {
+		if err := reader.Close(); err != nil {
+			log.Println("Error: ", err)
+		}
+	}()
 
 	_, err = io.Copy(os.Stdout, reader)
 
