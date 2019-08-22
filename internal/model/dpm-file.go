@@ -5,7 +5,7 @@ type Command struct {
 	Name        string   `yaml:"-"`
 	Image       string   `yaml:"image"`
 	Entrypoints []string `yaml:"entrypoints,omitempty"`
-	VolumeName  string   `yaml:"volume-name,omitempty"`
+	VolumeName  string   `yaml:"volume_name,omitempty"`
 }
 
 // DPMFile is the type for the entire YAML file

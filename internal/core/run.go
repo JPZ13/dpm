@@ -4,10 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 
 	"github.com/JPZ13/dpm/internal/model"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/volume"
+	docker "github.com/docker/docker/client"
 )
 
 // Runner holds methods related to running
@@ -75,40 +80,106 @@ func runDockerizedCommand(args []string, project *model.ProjectInfo) error {
 }
 
 func runDocker(args []string, alias *model.AliasInfo) error {
+	dockerClient, err := docker.NewEnvClient()
+	if err != nil {
+		return err
+	}
+
 	// create named volume if it doesn't exist
-	err := maybeCreateVolume(alias.VolumeName)
+	volume, err := maybeCreateVolume(dockerClient, alias.VolumeName)
 	if err != nil {
 		return err
 	}
 
 	// run volume mounted container container
-	remainder := args[1:]
-	return runContainer(alias.Image, alias.VolumeName, remainder)
+	container, err := runContainer(dockerClient, alias.Image, volume)
+	if err != nil {
+		return err
+	}
+
+	return attachToContainer(dockerClient, container, args)
 }
 
-func maybeCreateVolume(volumeName string) error {
+func attachToContainer(dockerClient *docker.Client, container *container.ContainerCreateCreatedBody, args []string) error {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	dockerCmd := fmt.Sprintf(`docker volume create --driver local
-		--opt type=none device=%s --opt o=bind %s`, pwd, volumeName)
-
-	cmd := exec.Command(dockerCmd)
-	return cmd.Run()
-}
-
-func runContainer(imageName, volumeName string, remainder []string) error {
-	pwd, err := os.Getwd()
+	ctx := context.Background()
+	exec, err := dockerClient.ContainerExecCreate(ctx, container.ID, types.ExecConfig{
+		Tty:          true,
+		AttachStdin:  true,
+		AttachStderr: true,
+		AttachStdout: true,
+		WorkingDir:   pwd,
+		Cmd:          args,
+	})
 	if err != nil {
 		return err
 	}
 
-	dockerCmd := fmt.Sprintf(`docker run --rm -it
-		-v %s:%s -w %s %s`,
-		volumeName, pwd, pwd, imageName)
+	resp, err := dockerClient.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+		Detach: false,
+		Tty:    true,
+	})
+	defer resp.Close()
 
-	cmd := exec.Command(dockerCmd, remainder...)
-	return cmd.Run()
+	_, err = io.Copy(os.Stdout, resp.Reader)
+
+	return err
+}
+
+func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*types.Volume, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+	volume, err := dockerClient.VolumeCreate(ctx, volume.VolumeCreateBody{
+		Driver: "local",
+		DriverOpts: map[string]string{
+			"type":   "none",
+			"device": pwd,
+			"o":      "bind",
+		},
+		Name: volumeName,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &volume, nil
+}
+
+func runContainer(dockerClient *docker.Client, imageName string, volume *types.Volume) (*container.ContainerCreateCreatedBody, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+	container, err := dockerClient.ContainerCreate(ctx, &container.Config{
+		Image:        imageName,
+		Tty:          true,
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		WorkingDir:   pwd,
+	}, &container.HostConfig{
+		Binds: []string{
+			fmt.Sprintf("%s:%s", volume.Name, pwd),
+		},
+	}, nil, "")
+	if err != nil {
+		return nil, err
+	}
+
+	err = dockerClient.ContainerStart(ctx, container.ID, types.ContainerStartOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &container, nil
 }
