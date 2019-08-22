@@ -8,8 +8,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
+	"strings"
 
 	"github.com/JPZ13/dpm/internal/model"
+	"github.com/JPZ13/dpm/internal/pathtable"
+	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/volume"
@@ -35,6 +39,10 @@ func (r *runner) Run(ctx context.Context, args []string) error {
 
 	projectInfo, err := r.pathTable.Get(pwd)
 	if err != nil {
+		if err == pathtable.ErrNotFound {
+			return runBinaryFromPATH(args)
+		}
+
 		return err
 	}
 
@@ -43,6 +51,31 @@ func (r *runner) Run(ctx context.Context, args []string) error {
 	}
 
 	return runDockerizedCommand(args, projectInfo)
+}
+
+func runBinaryFromPATH(args []string) error {
+	userPath := os.Getenv("PATH")
+
+	subPaths := strings.Split(userPath, ":")
+
+	for _, subPath := range subPaths {
+		if strings.Contains(subPath, ".dpm") {
+			continue
+		}
+
+		cmd := args[0]
+		binaryPath := path.Join(subPath, cmd)
+		doesExist, _ := utils.DoesFileExist(binaryPath)
+		if doesExist {
+			remainder := args[1:]
+			command := exec.Command(binaryPath, remainder...)
+			command.Stdout = os.Stdout
+			command.Stderr = os.Stderr
+			return command.Run()
+		}
+	}
+
+	return errors.New("command not found")
 }
 
 // callBinary calls the stored binary of an alias
