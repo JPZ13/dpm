@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 
@@ -96,11 +97,10 @@ func runDocker(args []string, alias *model.AliasInfo) error {
 		return err
 	}
 
-	remainder := args[1:]
-	return attachToContainer(dockerClient, container, remainder)
+	return attachToContainer(dockerClient, container, args)
 }
 
-func attachToContainer(dockerClient *docker.Client, container *container.ContainerCreateCreatedBody, remainder []string) error {
+func attachToContainer(dockerClient *docker.Client, container *container.ContainerCreateCreatedBody, args []string) error {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -113,16 +113,19 @@ func attachToContainer(dockerClient *docker.Client, container *container.Contain
 		AttachStderr: true,
 		AttachStdout: true,
 		WorkingDir:   pwd,
-		Cmd:          remainder,
+		Cmd:          args,
 	})
 	if err != nil {
 		return err
 	}
 
-	_, err = dockerClient.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
+	resp, err := dockerClient.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{
 		Detach: false,
 		Tty:    true,
 	})
+	defer resp.Close()
+
+	_, err = io.Copy(os.Stdout, resp.Reader)
 
 	return err
 }
