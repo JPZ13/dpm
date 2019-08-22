@@ -1,6 +1,6 @@
 commands:
   glide:
-    image: dockerepo/glide
+    image: dockerepo/glide:latest
     entrypoints:
       - glide
     volume_name: glide

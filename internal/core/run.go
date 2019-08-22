@@ -159,6 +159,11 @@ func runContainer(dockerClient *docker.Client, imageName string, volume *types.V
 		return nil, err
 	}
 
+	err = pullImageIfNotInDockerHost(dockerClient, imageName)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx := context.Background()
 	container, err := dockerClient.ContainerCreate(ctx, &container.Config{
 		Image:        imageName,
@@ -182,4 +187,31 @@ func runContainer(dockerClient *docker.Client, imageName string, volume *types.V
 	}
 
 	return &container, nil
+}
+
+func pullImageIfNotInDockerHost(dockerClient *docker.Client, imageName string) error {
+	ctx := context.Background()
+	images, err := dockerClient.ImageList(ctx, types.ImageListOptions{})
+	if err != nil {
+		return err
+	}
+
+	// don't pull if image already in host
+	for _, image := range images {
+		for _, repoTag := range image.RepoTags {
+			if repoTag == imageName {
+				return nil
+			}
+		}
+	}
+
+	reader, err := dockerClient.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	_, err = io.Copy(os.Stdout, reader)
+
+	return err
 }
