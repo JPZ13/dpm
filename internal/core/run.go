@@ -3,11 +3,11 @@ package core
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/JPZ13/dpm/internal/model"
+	docker "github.com/fsouza/go-dockerclient"
 )
 
 // Runner holds methods related to running
@@ -75,40 +75,67 @@ func runDockerizedCommand(args []string, project *model.ProjectInfo) error {
 }
 
 func runDocker(args []string, alias *model.AliasInfo) error {
+	dockerClient, err := docker.NewClientFromEnv()
+	if err != nil {
+		return err
+	}
+
 	// create named volume if it doesn't exist
-	err := maybeCreateVolume(alias.VolumeName)
+	volume, err := maybeCreateVolume(dockerClient, alias.VolumeName)
 	if err != nil {
 		return err
 	}
 
 	// run volume mounted container container
 	remainder := args[1:]
-	return runContainer(alias.Image, alias.VolumeName, remainder)
+	return runContainer(dockerClient, alias.Image, volume, remainder)
 }
 
-func maybeCreateVolume(volumeName string) error {
+func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*docker.Volume, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	volume, err := dockerClient.CreateVolume(docker.CreateVolumeOptions{
+		Driver: "local",
+		DriverOpts: map[string]string{
+			"type":   "none",
+			"device": pwd,
+			"o":      "bind",
+		},
+		Name: volumeName,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return volume, nil
+}
+
+func runContainer(dockerClient *docker.Client, imageName string, volume *docker.Volume, remainder []string) error {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	dockerCmd := fmt.Sprintf(`docker volume create --driver local
-		--opt type=none device=%s --opt o=bind %s`, pwd, volumeName)
-
-	cmd := exec.Command(dockerCmd)
-	return cmd.Run()
-}
-
-func runContainer(imageName, volumeName string, remainder []string) error {
-	pwd, err := os.Getwd()
+	container, err := dockerClient.CreateContainer(docker.CreateContainerOptions{
+		Config: &docker.Config{
+			Image:        imageName,
+			Cmd:          remainder,
+			Tty:          true,
+			AttachStdin:  true,
+			AttachStdout: true,
+			AttachStderr: true,
+			WorkingDir:   pwd,
+			// Volumes: map[string]struct{}{
+			// 	volume.Name: *volume,
+			// },
+		},
+	})
 	if err != nil {
 		return err
 	}
 
-	dockerCmd := fmt.Sprintf(`docker run --rm -it
-		-v %s:%s -w %s %s`,
-		volumeName, pwd, pwd, imageName)
-
-	cmd := exec.Command(dockerCmd, remainder...)
-	return cmd.Run()
+	return dockerClient.StartContainer(container.ID, nil)
 }
