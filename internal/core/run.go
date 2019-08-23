@@ -245,6 +245,8 @@ func pullImageIfNotInDockerHost(dockerClient *docker.Client, imageName string) e
 		return err
 	}
 
+	imageName = ensureImageTag(imageName)
+
 	// don't pull if image already in host
 	for _, image := range images {
 		for _, repoTag := range image.RepoTags {
@@ -282,4 +284,13 @@ func stopAndRemoveContainer(dockerClient *docker.Client, containerID string) err
 		RemoveLinks:   false,
 		Force:         false,
 	})
+}
+
+func ensureImageTag(imageName string) string {
+	if strings.Contains(imageName, ":") {
+		return imageName
+	}
+
+	image := []string{imageName, "latest"}
+	return strings.Join(image, ":")
 }
