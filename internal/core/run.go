@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/JPZ13/dpm/internal/model"
 	"github.com/JPZ13/dpm/internal/pathtable"
@@ -137,7 +138,12 @@ func runDocker(args []string, alias *model.AliasInfo) error {
 		return err
 	}
 
-	return attachToContainer(dockerClient, container, args)
+	err = attachToContainer(dockerClient, container, args)
+	if err != nil {
+		return err
+	}
+
+	return stopAndRemoveContainer(dockerClient, container.ID)
 }
 
 func attachToContainer(dockerClient *docker.Client, container *container.ContainerCreateCreatedBody, args []string) error {
@@ -261,4 +267,19 @@ func pullImageIfNotInDockerHost(dockerClient *docker.Client, imageName string) e
 	_, err = io.Copy(os.Stdout, reader)
 
 	return err
+}
+
+func stopAndRemoveContainer(dockerClient *docker.Client, containerID string) error {
+	ctx := context.Background()
+	timeout := time.Duration(2 * time.Second)
+	err := dockerClient.ContainerStop(ctx, containerID, &timeout)
+	if err != nil {
+		return err
+	}
+
+	return dockerClient.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{
+		RemoveVolumes: false,
+		RemoveLinks:   false,
+		Force:         false,
+	})
 }
