@@ -1,4 +1,6 @@
 # Docker Package Manager
+[![CircleCI](https://circleci.com/gh/JPZ13/dpm.svg?style=shield)](https://circleci.com/gh/JPZ13/dpm)[![Go Report Card](https://goreportcard.com/badge/github.com/JPZ13/dpm)](https://goreportcard.com/report/github.com/JPZ13/dpm)
+
 
 Tired of spending too much time configuring your machine? Me too.
 
@@ -10,12 +12,7 @@ DPM solves:
 
 ## Installation
 
-Install Docker. Then:
-
-    curl -L "https://github.com/JPZ13/dpm/releases/download/0.2.2/dpm-$(uname -s)-$(uname -m)" -o /usr/local/bin/dpm; chmod +x /usr/local/bin/dpm
-
-Make sure /usr/local/bin is ahead of /usr/bin in your $PATH. Most likely, this
-is already the case.
+New install instructions to come
 
 ## Usage
 
@@ -27,48 +24,47 @@ Add a file called `dpm.yml` to your project root defining the commands you want 
 commands:
   go:
     image: golang:1.7.5
-    context: /go/src/github.com/JPZ13/dpm
+    entrypoints:
+      - go
+    volume_name: go
 
-  glide:
-    image: dockerepo/glide
+  python:
+    image: python:alpine
+    entrypoints:
+      - python
+      - pip
+    volume_name: python
 ```
-
-These are container definitions with a syntax similar to Compose. The following defaults will apply:
-* The entrypoint of the container defaults to the command name
-* The current folder is mounted read/write to `context` (default: `/run/context`)
-* The working directory defaults to `context` (default: `/run/context`)
-* Containers are deleted after execution (`--rm`)
-* They are run in interactive mode (`-i`) and with tty enabled (`-t`)
-
-You can override these or define any other container attributes.
-
-Currently only the following attributes are supported: `image`, `entrypoint`, `context`, `volumes`.
 
 ### Installing commands
 
 Execute:
-
-    dpm install
-    
-and it will create all command aliases in `.dpm/`. Run it every time you update `dpm.yml`.
+```
+    dpm activate
+```
+DPM will then route any of the entrypoints in the current directory or child
+directories to spin up a container using the specified image, attach it to a
+named volume that holds the current directory and any child directories, run the
+command in the volume-mounted container, and then stop and remove the container.
+The end result is that your command line behaves as normal, but it runs commands
+in containers
 
 
 ### Using project commands
 
-From the project root, run the following to enable its installed commands:
-
-    dpm activate
-
-Then, just execute them as if they were installed in your OS:
-
-    $ go version
-    go version go1.7.5 linux/amd64
-
-You can also list which commands are currently available by running:
-
-    dpm list
+Use commands as you normally would in the activated directory and any child
+directories. The commands will only be run in containers in the activated
+directories and not in outside directories.
 
 ### Deactivate
 To go back to your normal system configuration,
-
+```
   dpm deactivate
+```
+
+### Shoutout
+
+Special thank you to [fermayo](https://github.com/fermayo) who did the initial [POC](https://github.com/fermayo/dpm). I heavily modified
+the project later during Docker's Hack Week and continued working on it
+subsequently. Also thank you to Krish for organizing Docker Hack Week, despite
+leaving me off the ballot for voting. :grin:
