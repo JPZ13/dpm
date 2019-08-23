@@ -10,6 +10,8 @@ import (
 const testDPMFileLocation = "./test-data/dpm.yml"
 
 func TestTranslateDPMFileToProjectInfo(t *testing.T) {
+	t.Parallel()
+
 	dpmFile := &model.DPMFile{}
 	err := parseYAMLFile(testDPMFileLocation, dpmFile)
 	require.NoError(t, err)
