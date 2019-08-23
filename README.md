@@ -64,7 +64,7 @@ To go back to your normal system configuration,
 
 ### Shoutout
 
-Special thank you to [fermayo](https://github.com/fermayo) who did the initial [POC](https://github.com/fermayo/dpm) I substantially modified
+Special thank you to [fermayo](https://github.com/fermayo) who did the initial [POC](https://github.com/fermayo/dpm). I heavily modified
 the project later during Docker's Hack Week and continued working on it
 subsequently. Also thank you to Krish for organizing Docker Hack Week, despite
 leaving me off the ballot for voting. :grin:
