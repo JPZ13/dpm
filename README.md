@@ -62,7 +62,11 @@ To go back to your normal system configuration,
   dpm deactivate
 ```
 
-### Shoutout
+## Roadmap
+
+See the `roadmap.md` file in the `/design` folder.
+
+## Shoutout
 
 Special thank you to [fermayo](https://github.com/fermayo) who did the initial [POC](https://github.com/fermayo/dpm). I heavily modified
 the project later during Docker's Hack Week and continued working on it
