@@ -17,6 +17,9 @@ func init() {
 var RootCmd = &cobra.Command{
 	Use:   "dpm",
 	Short: "Install development tools locally to your project using docker containers",
+	FParseErrWhitelist: cobra.FParseErrWhitelist{
+		UnknownFlags: true,
+	},
 }
 
 var activateCmd = &cobra.Command{
@@ -38,6 +41,9 @@ var deactivateCmd = &cobra.Command{
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run an alias that is defined in the dpm yaml file",
+	FParseErrWhitelist: cobra.FParseErrWhitelist{
+		UnknownFlags: true,
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		run.Command(args)
 	},
