@@ -5,7 +5,7 @@ commands:
       - glide
     volume_name: glide
   go:
-    image: golang:1.7.5
+    image: golang:1.12.9
     entrypoints:
       - go
     volume_name: go

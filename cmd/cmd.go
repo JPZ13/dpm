@@ -38,6 +38,9 @@ var deactivateCmd = &cobra.Command{
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run an alias that is defined in the dpm yaml file",
+	FParseErrWhitelist: cobra.FParseErrWhitelist{
+		UnknownFlags: true,
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		run.Command(args)
 	},
