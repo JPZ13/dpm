@@ -17,9 +17,6 @@ func init() {
 var RootCmd = &cobra.Command{
 	Use:   "dpm",
 	Short: "Install development tools locally to your project using docker containers",
-	FParseErrWhitelist: cobra.FParseErrWhitelist{
-		UnknownFlags: true,
-	},
 }
 
 var activateCmd = &cobra.Command{
