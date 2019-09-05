@@ -17,6 +17,7 @@ import (
 	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/volume"
 	docker "github.com/docker/docker/client"
 )
@@ -113,27 +114,27 @@ func runDockerizedCommand(args []string, project *model.ProjectInfo) error {
 			if alias != command {
 				continue
 			}
-			return runDocker(args, &aliasInfo)
+			return runDocker(args, &aliasInfo, project.Directory)
 		}
 	}
 
 	return errors.New("Project error: alias not found")
 }
 
-func runDocker(args []string, alias *model.AliasInfo) error {
+func runDocker(args []string, alias *model.AliasInfo, projectDirectory string) error {
 	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
 		return err
 	}
 
 	// create named volume if it doesn't exist
-	volume, err := maybeCreateVolume(dockerClient, alias.VolumeName)
+	volume, err := maybeCreateVolume(dockerClient, alias.VolumeName, projectDirectory)
 	if err != nil {
 		return err
 	}
 
 	// run volume mounted container container
-	container, err := runContainer(dockerClient, alias.Image, volume)
+	container, err := runContainer(dockerClient, alias.Image, projectDirectory, volume)
 	if err != nil {
 		return err
 	}
@@ -179,18 +180,25 @@ func attachToContainer(dockerClient *docker.Client, container *container.Contain
 	return err
 }
 
-func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*types.Volume, error) {
-	pwd, err := os.Getwd()
+func maybeCreateVolume(dockerClient *docker.Client, volumeName, projectDirectory string) (*types.Volume, error) {
+	ctx := context.Background()
+
+	volumeList, err := dockerClient.VolumeList(ctx, filters.Args{})
 	if err != nil {
 		return nil, err
 	}
 
-	ctx := context.Background()
+	for _, volume := range volumeList.Volumes {
+		if volume.Name == volumeName {
+			return volume, nil
+		}
+	}
+
 	volume, err := dockerClient.VolumeCreate(ctx, volume.VolumeCreateBody{
 		Driver: "local",
 		DriverOpts: map[string]string{
 			"type":   "none",
-			"device": pwd,
+			"device": projectDirectory,
 			"o":      "bind",
 		},
 		Name: volumeName,
@@ -202,7 +210,7 @@ func maybeCreateVolume(dockerClient *docker.Client, volumeName string) (*types.V
 	return &volume, nil
 }
 
-func runContainer(dockerClient *docker.Client, imageName string, volume *types.Volume) (*container.ContainerCreateCreatedBody, error) {
+func runContainer(dockerClient *docker.Client, imageName, projectDirectory string, volume *types.Volume) (*container.ContainerCreateCreatedBody, error) {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return nil, err
@@ -214,6 +222,8 @@ func runContainer(dockerClient *docker.Client, imageName string, volume *types.V
 	}
 
 	ctx := context.Background()
+	// bind wherever the dpm file is but use current wd on host
+	// as container wd
 	container, err := dockerClient.ContainerCreate(ctx, &container.Config{
 		Image:        imageName,
 		Tty:          true,
@@ -223,7 +233,7 @@ func runContainer(dockerClient *docker.Client, imageName string, volume *types.V
 		WorkingDir:   pwd,
 	}, &container.HostConfig{
 		Binds: []string{
-			fmt.Sprintf("%s:%s", volume.Name, pwd),
+			fmt.Sprintf("%s:%s", volume.Name, projectDirectory),
 		},
 	}, nil, "")
 	if err != nil {
