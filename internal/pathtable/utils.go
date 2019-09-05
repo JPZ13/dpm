@@ -6,14 +6,14 @@ import (
 	"github.com/JPZ13/dpm/internal/utils"
 )
 
-func (c *client) getDigestFromPath(location string) (string, error) {
+func (c *client) getDigestFromPath(location string) (*string, error) {
 	digest, err := utils.GetDigestJSONFilename(location)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	fullPath := path.Join(c.baseDirectory, digest)
-	return fullPath, nil
+	return &fullPath, nil
 }
 
 func (c *client) ensureBaseDirectory() error {

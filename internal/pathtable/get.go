@@ -20,14 +20,14 @@ func (c *client) Get(location string) (*model.ProjectInfo, error) {
 	}
 
 	// bubble up path checking for matches in basedirectory
-	var digest string
+	var digest *string
 	for location != "/" {
 		digest, err = c.getDigestFromPath(location)
 		if err != nil {
 			return nil, err
 		}
 
-		hasFile, _ := utils.DoesFileExist(digest)
+		hasFile, _ := utils.DoesFileExist(*digest)
 		if hasFile {
 			break
 		}
@@ -41,13 +41,13 @@ func (c *client) Get(location string) (*model.ProjectInfo, error) {
 			return nil, err
 		}
 
-		hasFile, _ := utils.DoesFileExist(digest)
+		hasFile, _ := utils.DoesFileExist(*digest)
 		if !hasFile {
 			return nil, ErrNotFound
 		}
 	}
 
-	return getProjectInfoAtPath(digest)
+	return getProjectInfoAtPath(*digest)
 }
 
 func getProjectInfoAtPath(location string) (*model.ProjectInfo, error) {
@@ -63,4 +63,9 @@ func getProjectInfoAtPath(location string) (*model.ProjectInfo, error) {
 	}
 
 	return &projectInfo, nil
+}
+
+// GetDigest gets the hashed filename used to store project config
+func (c *client) GetDigest(location string) (*string, error) {
+	return c.getDigestFromPath(location)
 }

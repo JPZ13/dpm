@@ -39,6 +39,7 @@ func (p *project) InstallProject(ctx context.Context, dpmFileLocation string) er
 
 	// set project info
 	dpmDir := path.Dir(dpmFileLocation)
+	projectInfo.Directory = dpmDir
 
 	err = p.pathTable.Set(dpmDir, projectInfo)
 	if err != nil {

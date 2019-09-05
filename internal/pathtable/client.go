@@ -6,6 +6,7 @@ import "github.com/JPZ13/dpm/internal/model"
 type Client interface {
 	Get(location string) (*model.ProjectInfo, error)
 	Set(path string, info *model.ProjectInfo) error
+	GetDigest(location string) (*string, error)
 }
 
 type client struct {
