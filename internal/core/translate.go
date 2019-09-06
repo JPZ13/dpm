@@ -2,17 +2,18 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"strings"
 
 	"github.com/JPZ13/dpm/internal/model"
 )
 
-func translateDPMFileToProjectInfo(dpmFile *model.DPMFile) (*model.ProjectInfo, error) {
+func translateDPMFileToProjectInfo(dpmFile *model.DPMFile, digest string) (*model.ProjectInfo, error) {
 	aliases := []model.AliasInfo{}
 
-	for _, cmd := range dpmFile.Commands {
-		alias, err := translateCommandToAliasInfo(&cmd)
+	for name, cmd := range dpmFile.Commands {
+		alias, err := translateCommandToAliasInfo(&cmd, name, digest)
 		if err != nil {
 			return nil, err
 		}
@@ -25,16 +26,18 @@ func translateDPMFileToProjectInfo(dpmFile *model.DPMFile) (*model.ProjectInfo, 
 	}, nil
 }
 
-func translateCommandToAliasInfo(cmd *model.Command) (*model.AliasInfo, error) {
+func translateCommandToAliasInfo(cmd *model.Command, name, digest string) (*model.AliasInfo, error) {
 	aliasTable, err := translateEntrypointsToAliasTable(&cmd.Entrypoints)
 	if err != nil {
 		return nil, err
 	}
 
+	volumeName := makeVolumeName(name, digest)
+
 	return &model.AliasInfo{
 		Aliases:    *aliasTable,
 		Image:      cmd.Image,
-		VolumeName: cmd.VolumeName,
+		VolumeName: volumeName,
 	}, nil
 }
 
@@ -78,4 +81,12 @@ func isCommandNotFoundError(err error) bool {
 	}
 
 	return false
+}
+
+func makeVolumeName(alias, digest string) string {
+	// get first 8 characters of digest hash
+	digest = strings.TrimPrefix(digest, "sha256:")
+	digest = digest[0:8]
+
+	return fmt.Sprintf("dpm-%s-%s", alias, digest)
 }

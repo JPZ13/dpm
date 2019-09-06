@@ -26,5 +26,5 @@ func (c *client) Set(path string, info *model.ProjectInfo) error {
 	}
 
 	// write to hashed path address in base directory
-	return utils.WriteFileBytes(digest, bytes)
+	return utils.WriteFileBytes(*digest, bytes)
 }

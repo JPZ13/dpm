@@ -11,6 +11,7 @@ type AliasInfo struct {
 // ProjectInfo holds configuration information
 // about a project
 type ProjectInfo struct {
-	IsActive bool        `json:"isActive"`
-	Commands []AliasInfo `json:"commands"`
+	IsActive  bool        `json:"isActive"`
+	Commands  []AliasInfo `json:"commands"`
+	Directory string      `json:"directory"`
 }

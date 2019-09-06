@@ -3,15 +3,12 @@ commands:
     image: dockerepo/glide:latest
     entrypoints:
       - glide
-    volume_name: glide
   go:
     image: golang:1.12.9
     entrypoints:
       - go
-    volume_name: go
   python:
     image: python:latest
     entrypoints:
       - python
       - pip
-    volume_name: python
