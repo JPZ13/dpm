@@ -1,7 +1,5 @@
 # Roadmap
 
-- Have volume names be generated and use the first 8 letters of the project path
-  hash prefixed by "dpm-"
 - Add list command to list whether the project is active and any commands
   defined in the project's dpm file
 - Modify the path table to handle blobs as originally intended rather than

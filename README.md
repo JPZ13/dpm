@@ -26,14 +26,12 @@ commands:
     image: golang:1.7.5
     entrypoints:
       - go
-    volume_name: go
 
   python:
     image: python:alpine
     entrypoints:
       - python
       - pip
-    volume_name: python
 ```
 
 ### Installing commands
