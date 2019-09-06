@@ -1,9 +1,11 @@
 package core
 
 import (
+	"path"
 	"testing"
 
 	"github.com/JPZ13/dpm/internal/model"
+	"github.com/JPZ13/dpm/internal/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,7 +21,11 @@ func TestTranslateDPMFileToProjectInfo(t *testing.T) {
 	testDPMFile := makeTestDPMFile()
 	require.Equal(t, *testDPMFile, *dpmFile)
 
-	projectInfo, err := translateDPMFileToProjectInfo(dpmFile)
+	dpmDir := path.Dir(testDPMFileLocation)
+	digest, err := utils.GetDigestJSONFilename(dpmDir)
+	require.NoError(t, err)
+
+	projectInfo, err := translateDPMFileToProjectInfo(dpmFile, digest)
 	require.NoError(t, err)
 	require.NotNil(t, projectInfo)
 }

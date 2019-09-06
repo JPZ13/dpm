@@ -64,8 +64,3 @@ func getProjectInfoAtPath(location string) (*model.ProjectInfo, error) {
 
 	return &projectInfo, nil
 }
-
-// GetDigest gets the hashed filename used to store project config
-func (c *client) GetDigest(location string) (*string, error) {
-	return c.getDigestFromPath(location)
-}

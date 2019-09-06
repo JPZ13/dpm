@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/JPZ13/dpm/internal/model"
+	"github.com/JPZ13/dpm/internal/utils"
 	"gopkg.in/yaml.v2"
 )
 
@@ -29,18 +30,23 @@ func (p *project) InstallProject(ctx context.Context, dpmFileLocation string) er
 		return err
 	}
 
+	dpmDir := path.Dir(dpmFileLocation)
+	digest, err := utils.GetDigestJSONFilename(dpmDir)
+	if err != nil {
+		return err
+	}
+
 	// translate to project info
-	projectInfo, err := translateDPMFileToProjectInfo(dpmFile)
+	projectInfo, err := translateDPMFileToProjectInfo(dpmFile, digest)
 	if err != nil {
 		return err
 	}
 
 	projectInfo.IsActive = true
 
-	// set project info
-	dpmDir := path.Dir(dpmFileLocation)
 	projectInfo.Directory = dpmDir
 
+	// set project info
 	err = p.pathTable.Set(dpmDir, projectInfo)
 	if err != nil {
 		return err
