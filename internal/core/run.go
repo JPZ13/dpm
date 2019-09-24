@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 	"time"
@@ -20,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/volume"
 	docker "github.com/docker/docker/client"
+	"github.com/go-cmd/cmd"
 )
 
 // Runner holds methods related to running
@@ -70,7 +70,8 @@ func runBinaryFromPATH(args []string) error {
 		doesExist, _ := utils.DoesFileExist(binaryPath)
 		if doesExist {
 			remainder := args[1:]
-			return runShellCommand(binaryPath, remainder...)
+			runShellCommand(binaryPath, remainder...)
+			return nil
 		}
 	}
 
@@ -78,13 +79,15 @@ func runBinaryFromPATH(args []string) error {
 }
 
 // runShellCommand is a helper function for running commands
-// on the terminal
-func runShellCommand(cmdName string, args ...string) error {
-	command := exec.Command(cmdName, args...)
-	command.Stdin = os.Stdin
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-	return command.Run()
+// that handles race conditions using the go-cmd package
+func runShellCommand(cmdName string, args ...string) {
+	shellCmd := cmd.NewCmd(cmdName, args...)
+
+	status := <-shellCmd.Start()
+
+	for _, line := range status.Stdout {
+		fmt.Println(line)
+	}
 }
 
 // callBinary calls the stored binary of an alias
@@ -99,7 +102,8 @@ func callBinary(args []string, project *model.ProjectInfo) error {
 			}
 
 			// execute command of binary and remainder
-			return runShellCommand(binaryPath, remainder...)
+			runShellCommand(binaryPath, remainder...)
+			return nil
 		}
 	}
 
